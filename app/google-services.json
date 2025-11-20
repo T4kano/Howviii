@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1029795377695",
+    "project_id": "how-viii",
+    "storage_bucket": "how-viii.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1029795377695:android:4a747b42d5f5fcaa979b2a",
+        "android_client_info": {
+          "package_name": "com.example.howviii"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjW-PUBFpJ-4XsImQGQpWCMB-oHbE7Nqk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
