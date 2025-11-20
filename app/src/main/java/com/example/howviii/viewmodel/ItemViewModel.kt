@@ -1,5 +1,6 @@
 package com.example.howviii.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.howviii.model.Campus
@@ -30,6 +31,9 @@ class ItemViewModel : ViewModel() {
 
     private val _items = MutableStateFlow<List<Item>>(emptyList())
     val items = _items.asStateFlow()
+
+    private val _currentItem = MutableStateFlow<Item?>(null)
+    val currentItem = _currentItem.asStateFlow()
 
     private val _loading = MutableStateFlow(false)
     val loading = _loading.asStateFlow()
@@ -128,10 +132,9 @@ class ItemViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
-                val uuid = UUID.randomUUID().toString()
+                val doc = db.collection("items").document()
 
                 val item = Item(
-                    uuid = uuid,
                     title = title,
                     description = description,
                     local = local,
@@ -145,14 +148,66 @@ class ItemViewModel : ViewModel() {
                     type = type
                 )
 
-                db.collection("items")
-                    .document(uuid)
-                    .set(item)
-                    .await()
+                doc.set(item).await()
 
                 onSuccess()
             } catch (e: Exception) {
                 onError(e)
+            }
+        }
+    }
+
+    fun loadItem(uuid: String) {
+        viewModelScope.launch {
+            try {
+                val snapshot = db.collection("items")
+                    .document(uuid)
+                    .get()
+                    .await()
+
+                if (snapshot.exists()) {
+                    val item = snapshot.toObject(Item::class.java)
+                    _currentItem.value = item?.copy(id = snapshot.id)
+                } else {
+                    _currentItem.value = null
+                }
+
+            } catch (e: Exception) {
+                _currentItem.value = null
+            }
+        }
+    }
+
+    fun markAsReturned(uuid: String) {
+        viewModelScope.launch {
+            try {
+                db.collection("items")
+                    .document(uuid)
+                    .update("type", "recuperado")
+                    .await()
+
+                // Atualiza o estado local
+                _currentItem.value = _currentItem.value?.copy(type = "recuperado")
+
+            } catch (e: Exception) {
+                Log.e("ITEM_VM", "Erro ao marcar como recuperado", e)
+            }
+        }
+    }
+
+    fun deleteItem(uuid: String) {
+        viewModelScope.launch {
+            try {
+                db.collection("items")
+                    .document(uuid)
+                    .delete()
+                    .await()
+
+                // Remove o item atual da memória
+                _currentItem.value = null
+
+            } catch (e: Exception) {
+                Log.e("ITEM_VM", "Erro ao deletar item", e)
             }
         }
     }

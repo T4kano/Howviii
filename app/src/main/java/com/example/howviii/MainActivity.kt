@@ -1,7 +1,6 @@
 package com.example.howviii
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -12,12 +11,20 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.howviii.firebase.FirebaseAuthService
 import com.example.howviii.ui.theme.HowviiiTheme
 import com.example.howviii.ui.ListItemScreen
 import com.example.howviii.ui.ShowItemScreen
 import com.example.howviii.ui.CreateItemScreen
 import com.example.howviii.viewmodel.ItemViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+fun formatDate(date: Date?): String {
+    if (date == null) return ""
+    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return sdf.format(date)
+}
 
 class MainActivity : ComponentActivity() {
     private val itemViewModel: ItemViewModel by viewModels()
@@ -42,18 +49,19 @@ class MainActivity : ComponentActivity() {
                         composable("list") {
                             ListItemScreen(
                                 onAddClick = { navController.navigate("form") },
-                                onItemClick = { id -> navController.navigate("detail/$id") }
+                                onItemClick = { uuid -> navController.navigate("detail/$uuid") }
                             )
                         }
-                        composable("detail/{id}") {
+                        composable("detail/{uuid}") {
                             ShowItemScreen(
                                 navController,
-                                id = it.arguments?.getString("id")?.toInt() ?: 0,
-                                onEditClick = { navController.navigate("form?id=$it") }
+                                uuid = it.arguments?.getString("uuid") ?: "",
+                                viewModel = itemViewModel,
                             )
                         }
-                        composable("form?id={id}") {
+                        composable("form") {
                             CreateItemScreen(
+                                navController,
                                 viewModel = itemViewModel,
                                 onSave = { navController.popBackStack() }
                             )

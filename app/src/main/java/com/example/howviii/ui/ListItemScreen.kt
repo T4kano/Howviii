@@ -1,17 +1,20 @@
 package com.example.howviii.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -20,6 +23,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.howviii.data.ItemRepository
 import com.example.howviii.model.Item
 import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,22 +37,18 @@ fun ListItemScreen(
 
     var search by remember { mutableStateOf("") }
 
-    // campusId -> campusName
     var campusList by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
-    // valor selecionado = UUID
     var selectedCampusId by remember { mutableStateOf<String?>(null) }
 
     var items by remember { mutableStateOf(listOf<Item>()) }
     var loading by remember { mutableStateOf(false) }
     var endReached by remember { mutableStateOf(false) }
 
-    // 🔥 Carrega campus
     LaunchedEffect(true) {
         campusList = repo.loadCampus()
     }
 
-    // 🔥 Recarrega itens ao mudar busca/campus
     LaunchedEffect(search, selectedCampusId) {
         repo.resetPagination()
         loading = true
@@ -102,8 +102,12 @@ fun ListItemScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Campus") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor()
                 )
 
                 ExposedDropdownMenu(
@@ -139,38 +143,72 @@ fun ListItemScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
-                            .clickable { onItemClick(item.uuid) }
+                            .clickable { onItemClick(item.id) }
                     ) {
 
-                        Column(Modifier.padding(8.dp)) {
+                        Column(Modifier.padding(12.dp)) {
 
                             Image(
-                                painter = rememberAsyncImagePainter(
-                                    //"https://picsum.photos/200?random=${item.uuid.hashCode()}"
-                                    "https://picsum.photos/200"
-                                ),
+                                painter = rememberAsyncImagePainter("https://picsum.photos/200"),
                                 contentDescription = null,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(150.dp),
-                                contentScale = ContentScale.Crop
+                                    .height(150.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop,
                             )
 
                             Spacer(Modifier.height(6.dp))
 
-                            Text(item.title, style = MaterialTheme.typography.titleMedium)
-                            Text(item.description, maxLines = 2)
-                            Text(item.createdAt.toString(), fontSize = 12.sp)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(item.title, style = MaterialTheme.typography.titleMedium, fontSize = 24.sp)
 
-                            Text(
-                                item.type,
-                                color = if (item.type == "perdido") Color.Red else Color.Blue
-                            )
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            color = when (item.type) {
+                                                "perdido" -> {
+                                                    Color(0xFFe63946)
+                                                }
+                                                "recuperado" -> {
+                                                    Color(0xFF2a9d8f)
+                                                }
+                                                else -> {
+                                                    Color(0xFF0077b6)
+                                                }
+                                            },
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = item.type.replaceFirstChar { it.uppercase() },
+                                        color = Color.White,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+
+                            Text(item.description, maxLines = 2, fontSize = 16.sp)
+                            Spacer(Modifier.height(6.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("📍 ${item.local}")
+                                Text("📅 ${formatDate(item.createdAt)}")
+                            }
+
+                            Text("☎ ${item.contact}")
                         }
                     }
                 }
 
-                // 🔽  BOTÃO CARREGAR MAIS
                 if (!endReached && !loading) {
                     item {
                         Button(

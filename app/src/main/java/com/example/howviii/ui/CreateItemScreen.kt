@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.howviii.viewmodel.ItemViewModel
 import com.google.firebase.Timestamp
@@ -19,6 +20,7 @@ import com.google.firebase.Timestamp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateItemScreen(
+    navController: NavController,
     viewModel: ItemViewModel,
     onSave: () -> Unit
 ) {
@@ -155,6 +157,15 @@ fun CreateItemScreen(
                         .height(160.dp),
                     contentScale = ContentScale.Crop
                 )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { navController.navigateUp() }
+            ) {
+                Text("Voltar")
             }
 
             Spacer(Modifier.height(16.dp))

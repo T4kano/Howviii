@@ -3,7 +3,7 @@ package com.example.howviii.model
 import java.util.Date
 
 data class Item(
-    var uuid: String = "",
+    val id: String = "",
     var title: String = "",
     var description: String = "",
     var local: String = "",
