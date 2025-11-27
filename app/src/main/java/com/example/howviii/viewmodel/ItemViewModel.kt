@@ -13,11 +13,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.util.UUID
-import com.google.firebase.Timestamp
 import java.util.Date
 
-class ItemViewModel : ViewModel() {
+class ItemViewModel(firestore: FirebaseFirestore) : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
